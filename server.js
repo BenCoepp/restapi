@@ -22,10 +22,18 @@ const apiKey = '12345'
 
 app.get('/login', (req, res) => {
   res.send(200)
+  //TODO
+  //validate password and username 
+  //send token back
 })
 
 app.post('/createuser', (req, res) =>{
  res.send("sucess")
+ //TODO
+ //validate that user doas not exist
+ //validate that req send is ok
+ //create user
+ //respond that everything is ok
 })
 
 app.listen(port, () => {
