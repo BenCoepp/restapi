@@ -2,7 +2,7 @@ const express = require('express')
 const app = express()
 const port = 3000
 
-const apiKey = 12345
+const apiKey = '12345'
 
 app.get('/', (req, res) => {
   res.send(200)
