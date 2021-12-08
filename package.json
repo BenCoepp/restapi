@@ -1,0 +1,22 @@
+{
+  "name": "restapi_clicker",
+  "version": "1.0.0",
+  "description": "A Simple Rest Api for Clicker",
+  "main": "server.js",
+  "scripts": {
+    "test": "npm test",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://bencoepp.store"
+  },
+  "keywords": [
+    "node"
+  ],
+  "author": "BenCoepp",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "express": "^4.17.1"
+  }
+}
