@@ -20,12 +20,12 @@ con.connect(function(err) {
 
 const apiKey = '12345'
 
-app.get('/', (req, res) => {
+app.get('/login', (req, res) => {
   res.send(200)
 })
 
 app.post('/createuser', (req, res) =>{
- //TODO needs to be a function
+ res.send("sucess")
 })
 
 app.listen(port, () => {
