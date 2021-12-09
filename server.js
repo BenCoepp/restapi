@@ -23,6 +23,19 @@ const apiKey = '12345'
 
 app.get('/login', (req, res) => {
   console.log(JSON.stringify(req.query.apiKey))
+  if(apiKey == req.query.apiKey){
+    var loginCheckSQL = "SELECT * FROM USER WHERE USERNAME=" + req.query.username +" AND PASSWORD="+req.query.password
+    con.query(loginCheckSQL, function (err, result) {
+      if (err) throw err;
+      if(result != []){
+        console.log("Result USER: " + JSON.stringify(result));
+        //TODO generate token and place it inside token table
+        res.send({"token":""})
+      }else{
+        res.send(403)
+      }
+    });
+  }
   res.send(200)
   //TODO
   //validate password and username 
@@ -41,7 +54,6 @@ app.post('/createuser', (req, res) =>{
 function checkTablesExist(){
   con.query("SELECT * FROM information_schema.tables WHERE table_schema = 'test_db';", function (err, result) {
     if (err) throw err;
-    console.log("Result: " + JSON.stringify(result));
     if(result == ""){
       createTables()
     }else{
