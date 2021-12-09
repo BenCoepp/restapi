@@ -83,6 +83,18 @@ function createTables(){
   });
 }
 
+app.get('/getsession', (req, res) =>{
+  if(apiKey == req.query.apiKey){
+   
+  }
+})
+
+app.post('/createsession', (req, res) =>{
+  if(apiKey == req.query.apiKey){
+   
+  }
+})
+
 app.listen(port, () => {
   console.log(`Example app listening at http://localhost:${port}`)
 })
