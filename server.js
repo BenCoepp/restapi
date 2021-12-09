@@ -13,13 +13,8 @@ var con = mysql.createConnection({
 
 con.connect(function(err) {
   if (err) throw err;
-  console.log("Result: " + err);
   if(err == null){
-    if(checkTablesExist()){
-      
-    }else{
-      
-    }
+    checkTablesExist()
   }
 });
 
@@ -46,17 +41,25 @@ function checkTablesExist(){
   con.query("SELECT * FROM information_schema.tables WHERE table_schema = 'test_db';", function (err, result) {
     if (err) throw err;
     console.log("Result: " + JSON.stringify(result));
-    if(result == []){
-      return false
+    if(result == ""){
+      createTables()
     }else{
-      return true
+      console.log("TABLES EXIST")
     }
   });
 }
 
 function createTables(){
-  var sqlUSER = "CREATE TABLE USER (USERID INT AUTO_INCREMENT PRIMARY KEY, NAME VARCHAR(255), USERNAME VARCHAR(255), PASSWORD VARCHAR(255), CREATINDATE INT, LASTLOGIN INT)"
-  var sqlSESSION = ""
+  var sqlUSER = "CREATE TABLE USER (USERID INT NOT NULL AUTO_INCREMENT,USERRANK INT NOT NULL ,NAME VARCHAR(255),USERNAME VARCHAR(255),PASSWORD VARCHAR(255),CREATINDATE INT,LASTLOGIN INT,COUNTRY VARCHAR(255),PRIMARY KEY (USERID, USERRANK));"
+  var sqlSESSION = "CREATE TABLE SESSION (SESSIONID INT AUTO_INCREMENT,USERID INT,CLICKS MEDIUMTEXT NOT NULL,STARTTIME INT,STOPTIME INT,PLATFORM VARCHAR(255),GOODCLICKS INT,BADCLICKS INT,PRIMARY KEY (SESSIONID, USERID));"
+  con.query(sqlUSER, function (err, result) {
+    if (err) throw err;
+    console.log("Result USER: " + JSON.stringify(result));
+  });
+  con.query(sqlSESSION, function (err, result) {
+    if (err) throw err;
+    console.log("Result USER: " + JSON.stringify(result));
+  });
 }
 
 app.listen(port, () => {
