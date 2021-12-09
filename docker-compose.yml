@@ -6,6 +6,8 @@ services:
     environment:
       MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: test_db
+    volumes:
+      - my-datavolume:/var/lib/mysql
     ports:
       - "3308:3306"
   phpmyadmin:
@@ -17,3 +19,5 @@ services:
       PMA_PASSWORD: root
     ports:
       - "8080:80"
+volumes:
+  my-datavolume:
