@@ -27,10 +27,13 @@ app.get('/login', (req, res) => {
     var loginCheckSQL = "SELECT * FROM USER WHERE USERNAME=" + req.query.username +" AND PASSWORD="+req.query.password
     con.query(loginCheckSQL, function (err, result) {
       if (err) throw err;
-      if(result != []){
+      if(result !== []){
         console.log("Result USER: " + JSON.stringify(result));
-        //TODO generate token and place it inside token table
-        res.send({"token":""})
+        var token = "1345"
+        con.query("INSERT INTO TOKEN (USERID, TOKENSTRING)VALUES ("+result.USERID +", "+token +");", function (err, result) {
+          if (err) throw err;
+          res.send({"token":token})
+        });
       }else{
         res.send(403)
       }
@@ -44,11 +47,17 @@ app.get('/login', (req, res) => {
 
 app.post('/createuser', (req, res) =>{
  res.send("sucess")
- //TODO
- //validate that user doas not exist
- //validate that req send is ok
- //create user
- //respond that everything is ok
+ if(apiKey == req.query.apiKey){
+  var createUser = "INSERT INTO USER (USERRANK, NAME, USERNAME, PASSWORD, CREATINDATE, LASTLOGIN, COUNTRY)VALUES ("+req.query.userrank +", "+req.query.name +", "+ req.query.username+", "+ req.query.password+", "+ req.query.creatindate+", "+ req.query.lastlogin+", "+ req.query.country+");"
+  con.query(createUser, function (err, result) {
+    if (err) throw err;
+    if(result !== []){
+      console.log("Result USER: " + JSON.stringify(result));
+    }else{
+      res.send(403)
+    }
+  });
+}
 })
 
 function checkTablesExist(){
@@ -65,11 +74,16 @@ function checkTablesExist(){
 function createTables(){
   var sqlUSER = "CREATE TABLE USER (USERID INT NOT NULL AUTO_INCREMENT,USERRANK INT NOT NULL ,NAME VARCHAR(255),USERNAME VARCHAR(255),PASSWORD VARCHAR(255),CREATINDATE INT,LASTLOGIN INT,COUNTRY VARCHAR(255),PRIMARY KEY (USERID, USERRANK));"
   var sqlSESSION = "CREATE TABLE SESSION (SESSIONID INT AUTO_INCREMENT,USERID INT,CLICKS MEDIUMTEXT NOT NULL,STARTTIME INT,STOPTIME INT,PLATFORM VARCHAR(255),GOODCLICKS INT,BADCLICKS INT,PRIMARY KEY (SESSIONID, USERID));"
+  var sqlTOKEN = "CREATE TABLE TOKEN (TOKENID INT NOT NULL AUTO_INCREMENT,USERID INT NOT NULL , TOKENSTRING VARCHAR(255),PRIMARY KEY (TOKENID, USERID));"
   con.query(sqlUSER, function (err, result) {
     if (err) throw err;
     console.log("Result USER: " + JSON.stringify(result));
   });
   con.query(sqlSESSION, function (err, result) {
+    if (err) throw err;
+    console.log("Result USER: " + JSON.stringify(result));
+  });
+  con.query(sqlTOKEN, function (err, result) {
     if (err) throw err;
     console.log("Result USER: " + JSON.stringify(result));
   });
