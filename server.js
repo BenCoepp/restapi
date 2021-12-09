@@ -22,6 +22,7 @@ con.connect(function(err) {
 const apiKey = '12345'
 
 app.get('/login', (req, res) => {
+  console.log(JSON.stringify(req.query.apiKey))
   res.send(200)
   //TODO
   //validate password and username 
