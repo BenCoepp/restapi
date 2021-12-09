@@ -24,13 +24,12 @@ const apiKey = '12345'
 app.get('/login', (req, res) => {
   console.log(JSON.stringify(req.query.apiKey))
   if(apiKey == req.query.apiKey){
-    var loginCheckSQL = "SELECT * FROM USER WHERE USERNAME=" + req.query.username +" AND PASSWORD="+req.query.password
+    var loginCheckSQL = "SELECT * FROM USER WHERE USERNAME='" + req.query.username +"' AND PASSWORD='"+req.query.password+"'"
     con.query(loginCheckSQL, function (err, result) {
       if (err) throw err;
       if(result !== []){
-        console.log("Result USER: " + JSON.stringify(result));
         var token = "1345"
-        con.query("INSERT INTO TOKEN (USERID, TOKENSTRING)VALUES ("+result.USERID +", "+token +");", function (err, result) {
+        con.query("INSERT INTO TOKEN (USERID, TOKENSTRING)VALUES ("+result[0]["USERID"] +", "+token +");", function (err, result) {
           if (err) throw err;
           res.send({"token":token})
         });
@@ -39,20 +38,15 @@ app.get('/login', (req, res) => {
       }
     });
   }
-  res.send(200)
-  //TODO
-  //validate password and username 
-  //send token back
 })
 
 app.post('/createuser', (req, res) =>{
- res.send("sucess")
  if(apiKey == req.query.apiKey){
-  var createUser = "INSERT INTO USER (USERRANK, NAME, USERNAME, PASSWORD, CREATINDATE, LASTLOGIN, COUNTRY)VALUES ("+req.query.userrank +", "+req.query.name +", "+ req.query.username+", "+ req.query.password+", "+ req.query.creatindate+", "+ req.query.lastlogin+", "+ req.query.country+");"
+  var createUser = "INSERT INTO USER (USERRANK,NAME,USERNAME,PASSWORD,CREATINDATE,LASTLOGIN,COUNTRY)VALUES (2 ,'JOE', 'joe', 'root',2021, 2021,'DE');"
   con.query(createUser, function (err, result) {
     if (err) throw err;
     if(result !== []){
-      console.log("Result USER: " + JSON.stringify(result));
+      res.send(200)
     }else{
       res.send(403)
     }
