@@ -91,7 +91,23 @@ app.get('/getsession', (req, res) =>{
 
 app.post('/createsession', (req, res) =>{
   if(apiKey == req.query.apiKey){
-   
+    var token = ""
+    con.query("SELECT TOKENSTRING FROM TOKEN WHERE USERID = "+ req.query.userid, function (err, result) {
+      if (err) throw err;
+      if(result == ""){
+        res.send(403)
+      }else{
+        if(result == req.query.token){
+          con.query("INSERT INTO SESSION () VALUES ()", function (err, result) {
+            if (err) throw err;
+            res.send(200)
+          });
+        }
+      }
+    });
+    if(token == req.query.token){
+      
+    }
   }
 })
 
