@@ -4,11 +4,11 @@ const port = 3000
 var mysql = require('mysql');
 
 var con = mysql.createConnection({
-  host: "127.0.0.1",
+  host: "localhost",
   user: "dev",
   password: "root",
   database: "test_db",
-  port: 3308
+  port: 3306
 });
 
 con.connect(function(err) {
@@ -22,14 +22,13 @@ con.connect(function(err) {
 const apiKey = '12345'
 
 app.get('/login', (req, res) => {
-  console.log(JSON.stringify(req.query.apiKey))
   if(apiKey == req.query.apiKey){
     var loginCheckSQL = "SELECT * FROM USER WHERE USERNAME='" + req.query.username +"' AND PASSWORD='"+req.query.password+"'"
     con.query(loginCheckSQL, function (err, result) {
       if (err) throw err;
       if(result !== []){
-        var token = "1345"
-        con.query("INSERT INTO TOKEN (USERID, TOKENSTRING)VALUES ("+result[0]["USERID"] +", "+token +");", function (err, result) {
+        var token = generateToken(25)
+        con.query("INSERT INTO TOKEN (USERID, TOKENSTRING)VALUES ("+result[0]["USERID"] +", '"+token +"');", function (err, result) {
           if (err) throw err;
           res.send({"token":token})
         });
@@ -42,7 +41,7 @@ app.get('/login', (req, res) => {
 
 app.post('/createuser', (req, res) =>{
  if(apiKey == req.query.apiKey){
-  var createUser = "INSERT INTO USER (USERRANK,NAME,USERNAME,PASSWORD,CREATINDATE,LASTLOGIN,COUNTRY)VALUES (2 ,'JOE', 'joe', 'root',2021, 2021,'DE');"
+  var createUser = "INSERT INTO USER (USERRANK,NAME,USERNAME,PASSWORD,CREATINDATE,LASTLOGIN,COUNTRY)VALUES (2 ,'" + req.query.name+"', '" + req.query.username+"', '" + req.query.password+"'," + req.query.creatintime + "," + req.query.lastlogin +",'" + req.query.country+"');"
   con.query(createUser, function (err, result) {
     if (err) throw err;
     if(result !== []){
@@ -51,6 +50,8 @@ app.post('/createuser', (req, res) =>{
       res.send(403)
     }
   });
+}else{
+  res.send(403)
 }
 })
 
@@ -110,6 +111,17 @@ app.post('/createsession', (req, res) =>{
     }
   }
 })
+
+function generateToken(length) {
+  var result           = '';
+  var characters       = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  var charactersLength = characters.length;
+  for ( var i = 0; i < length; i++ ) {
+    result += characters.charAt(Math.floor(Math.random() * 
+charactersLength));
+ }
+ return result;
+}
 
 app.listen(port, () => {
   console.log(`Example app listening at http://localhost:${port}`)
