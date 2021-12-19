@@ -21,6 +21,10 @@ con.connect(function(err) {
 
 const apiKey = '12345'
 
+app.get('/', (req, res) => {
+  res.send("Hello from the other side")
+})
+
 app.get('/login', (req, res) => {
   if(apiKey == req.query.apiKey){
     var loginCheckSQL = "SELECT * FROM USER WHERE USERNAME='" + req.query.username +"' AND PASSWORD='"+req.query.password+"'"
