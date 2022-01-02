@@ -2,6 +2,7 @@ const express = require('express')
 const app = express()
 const port = 3000
 var mysql = require('mysql');
+const schedule = require('node-schedule');
 
 var con = mysql.createConnection({
   host: "localhost",
@@ -12,7 +13,7 @@ var con = mysql.createConnection({
 });
 
 con.connect(function(err) {
-  if (err) throw err;
+  if (err) console.log(err);
   if(err == null){
     checkTablesExist()
   }
@@ -29,6 +30,10 @@ app.use(function (req, res, next){
   next();
 });
 
+process.on('uncaughtException', err => {
+  console.error('There was an uncaught error', err)
+})
+
 
 const apiKey = '12345'
 
@@ -41,28 +46,33 @@ app.get('/ping', (req, res) => {
 })
 
 app.get('/login', (req, res) => {
-  if(apiKey == req.query.apiKey){
-    var loginCheckSQL = "SELECT * FROM USER WHERE USERNAME='" + req.query.username +"' AND PASSWORD='"+req.query.password+"'"
-    con.query(loginCheckSQL, function (err, result) {
-      if (err) throw err;
-      if(result !== []){
-        var token = generateToken(25)
-        con.query("INSERT INTO TOKEN (USERID, TOKENSTRING)VALUES ("+result[0]["USERID"] +", '"+token +"');", function (err, result) {
-          if (err) throw err;
-          res.send({"token":token})
-        });
-      }else{
-        res.send(403)
-      }
-    });
+  try {
+    if(apiKey == req.query.apiKey){
+      var loginCheckSQL = "SELECT * FROM USER WHERE USERNAME='" + req.query.username +"' AND PASSWORD='"+req.query.password+"'"
+      con.query(loginCheckSQL, function (err, result) {
+        if (err) console.log(err);
+        if(result !== []){
+          var token = generateToken(25)
+          con.query("INSERT INTO TOKEN (USERID, TOKENSTRING)VALUES ("+result[0]["USERID"] +", '"+token +"');", function (err, result) {
+            if (err) console.log(err);
+            res.send({"token":token})
+          });
+        }else{
+          res.send(403)
+        }
+      });
+    }
+  } catch (error) {
+    console.log(error)
   }
 })
 
 app.post('/createuser', (req, res) =>{
  if(apiKey == req.query.apiKey){
-  var createUser = "INSERT INTO USER (USERRANK,NAME,USERNAME,PASSWORD,CREATINDATE,LASTLOGIN,COUNTRY,AGE)VALUES (2 ,'" + req.query.name+"', '" + req.query.username+"', '" + req.query.password+"'," + req.query.creatintime + "," + req.query.lastlogin +",'" + req.query.country+"'," +req.query.age + ");"
+  var createUser = "INSERT INTO USER (USERRANK,NAME,USERNAME,PASSWORD,CREATINDATE,LASTLOGIN,COUNTRY,AGE)VALUES (2 ,'" + req.query.name+"', '" + req.query.username+"', '" + req.query.password+"','" + req.query.creatindate + "','" + req.query.lastLogin +"','" + req.query.country+"'," +req.query.age + ");"
+  console.log(createUser)
   con.query(createUser, function (err, result) {
-    if (err) throw err;
+    if (err) console.log(err);
     if(result !== []){
       res.send(200)
     }else{
@@ -78,11 +88,11 @@ app.get('/getuser', (req, res) =>{
   if(apiKey == req.query.apiKey){
     var getToken = "SELECT * FROM TOKEN WHERE TOKENSTRING ='" + req.query.token + "'"
     con.query(getToken, function (err, resultToken) {
-      if (err) throw err;
+      if (err) console.log(err);
       if(resultToken !== []){
         var getUser = "SELECT * FROM USER WHERE USERNAME = '" + req.query.username + "' AND PASSWORD = '" + req.query.password + "'" 
         con.query(getUser, function (err, resultUser) {
-          if (err) throw err;
+          if (err) console.log(err);
           if(resultUser !== []){
             var tokenOBJ = resultToken
             var userOBJ = resultUser
@@ -108,7 +118,7 @@ app.get('/getuser', (req, res) =>{
 
 function checkTablesExist(){
   con.query("SELECT * FROM information_schema.tables WHERE table_schema = 'test_db';", function (err, result) {
-    if (err) throw err;
+    if (err) console.log(err);
     if(result == ""){
       createTables()
     }else{
@@ -118,20 +128,17 @@ function checkTablesExist(){
 }
 
 function createTables(){
-  var sqlUSER = "CREATE TABLE USER (USERID INT NOT NULL AUTO_INCREMENT,USERRANK INT NOT NULL ,NAME VARCHAR(255),USERNAME VARCHAR(255),PASSWORD VARCHAR(255),CREATINDATE INT,LASTLOGIN INT,COUNTRY VARCHAR(255),AGE INT,PRIMARY KEY (USERID, USERRANK));"
-  var sqlSESSION = "CREATE TABLE SESSION (SESSIONID INT AUTO_INCREMENT,USERID INT,CLICKS MEDIUMTEXT NOT NULL,STARTTIME INT,STOPTIME INT,PLATFORM VARCHAR(255),GOODCLICKS INT,BADCLICKS INT,PRIMARY KEY (SESSIONID, USERID));"
+  var sqlUSER = "CREATE TABLE USER (USERID INT NOT NULL AUTO_INCREMENT,USERRANK INT NOT NULL ,NAME VARCHAR(255),USERNAME VARCHAR(255),PASSWORD VARCHAR(255),CREATINDATE VARCHAR(255),LASTLOGIN VARCHAR(255),COUNTRY VARCHAR(255),AGE INT,PRIMARY KEY (USERID, USERRANK));"
+  var sqlSESSION = "CREATE TABLE SESSION (SESSIONID INT AUTO_INCREMENT,USERID INT,CLICKS MEDIUMTEXT NOT NULL,STARTTIME VARCHAR(255),STOPTIME VARCHAR(255),PLATFORM VARCHAR(255),GOODCLICKS INT,BADCLICKS INT,PRIMARY KEY (SESSIONID, USERID));"
   var sqlTOKEN = "CREATE TABLE TOKEN (TOKENID INT NOT NULL AUTO_INCREMENT,USERID INT NOT NULL , TOKENSTRING VARCHAR(255),PRIMARY KEY (TOKENID, USERID));"
   con.query(sqlUSER, function (err, result) {
-    if (err) throw err;
-    console.log("Result USER: " + JSON.stringify(result));
+    if (err) console.log(err);
   });
   con.query(sqlSESSION, function (err, result) {
-    if (err) throw err;
-    console.log("Result USER: " + JSON.stringify(result));
+    if (err) console.log(err);
   });
   con.query(sqlTOKEN, function (err, result) {
-    if (err) throw err;
-    console.log("Result USER: " + JSON.stringify(result));
+    if (err) console.log(err);
   });
 }
 
@@ -141,24 +148,47 @@ app.get('/getsession', (req, res) =>{
   }
 })
 
-app.post('/createsession', (req, res) =>{
-  console.log(JSON.stringify(req.query.userid))
+app.get('/getleaderboard', (req, res) =>{
   if(apiKey == req.query.apiKey){
     var getToken = "SELECT * FROM TOKEN WHERE TOKENSTRING ='" + req.query.token + "'"
     con.query(getToken, function (err, resultToken) {
-      if (err) throw err;
+      if (err) console.log(err);
+      if(resultToken !== []){
+        var getUSERS = "SELECT USERRANK,NAME,COUNTRY FROM USER ORDER BY USERRANK ASC"
+        con.query(getUSERS, function (err, resultUSER) {
+          if (err) console.log(err);
+          if(resultUSER !== []){
+            res.send(JSON.stringify(resultUSER))
+          }else{
+            res.send(404)
+          }
+        });
+      }else{
+        res.send(403)
+      }
+    });
+  }else{
+    res.send(403)
+  }
+})
+
+app.post('/createsession', (req, res) =>{
+  if(apiKey == req.query.apiKey){
+    var getToken = "SELECT * FROM TOKEN WHERE TOKENSTRING ='" + req.query.token + "'"
+    con.query(getToken, function (err, resultToken) {
+      if (err) console.log(err);
       if(resultToken !== []){
         var getUser = "SELECT * FROM USER WHERE USERID = " + req.query.userid 
         con.query(getUser, function (err, resultUser) {
-          if (err) throw err;
+          if (err) console.log(err);
           if(resultUser !== []){
             var tokenOBJ = resultToken
             var userOBJ = resultUser
             try {
               if(tokenOBJ[0].userid == userOBJ[0].userid){
-                var createSESSION = "INSERT INTO SESSION (USERID,CLICKS,STARTTIME,STOPTIME,PLATFORM,GOODCLICKS,BADCLICKS) VALUES ("+req.query.userid + " ,'" + req.query.clicks+"', " + req.query.starttime+", " + req.query.stoptime+",'" + req.query.platform + "'," + req.query.goodclicks +"," + req.query.badclicks+");"
+                var createSESSION = "INSERT INTO SESSION (USERID,CLICKS,STARTTIME,STOPTIME,PLATFORM,GOODCLICKS,BADCLICKS) VALUES ("+req.query.userid + " ,'" + req.query.clicks+"', '" + req.query.starttime+"', '" + req.query.stoptime+"','" + req.query.platform + "'," + req.query.goodclicks +"," + req.query.badclicks+");"
                 con.query(createSESSION, function (err, result) {
-                  if (err) throw err;
+                  if (err) console.log(err);
                   if(result !== []){
                     res.send(200)
                   }else{
@@ -192,6 +222,10 @@ charactersLength));
  }
  return result;
 }
+
+const job = schedule.scheduleJob('10 * * * * *', function(){
+  //TODO here goas the function for updating the rancing
+});
 
 app.listen(port, () => {
   console.log(`Example app listening at http://localhost:${port}`)
