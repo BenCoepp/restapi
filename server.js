@@ -225,6 +225,31 @@ charactersLength));
 
 const job = schedule.scheduleJob('10 * * * * *', function(){
   //TODO here goas the function for updating the rancing
+    var stringSessions = "SELECT USERID, SESSIONID FROM SESSION"
+    console.log("test")
+    con.query(stringSessions, function (err, resultSession) {
+      if (err) console.log(err);
+      if(resultSession !== []){
+        var rankingList = [];
+        const arr = [5, 5, 5, 2, 2, 2, 2, 2, 9, 4];
+        const counts = {};
+        for (let index = 0; index < resultSession.length; index++) {
+          counts[resultSession[index]] = counts[resultSession[index]] ? counts[resultSession[index]] + 1 : 1;
+        }
+        console.log(counts[0]);
+        var stringUser = "SELECT * FROM USER"
+        con.query(stringUser, function (err, resultUser) {
+          if (err) console.log(err);
+          if(resultUser !== []){
+            
+          }else{
+            res.send(403)
+          }
+        });
+      }else{
+        res.send(403)
+      }
+    });
 });
 
 app.listen(port, () => {
