@@ -226,22 +226,38 @@ charactersLength));
 const job = schedule.scheduleJob('10 * * * * *', function(){
   //TODO here goas the function for updating the rancing
     var stringSessions = "SELECT USERID, SESSIONID FROM SESSION"
-    console.log("test")
     con.query(stringSessions, function (err, resultSession) {
       if (err) console.log(err);
       if(resultSession !== []){
-        var rankingList = [];
-        const arr = [5, 5, 5, 2, 2, 2, 2, 2, 9, 4];
-        const counts = {};
+        var numberArray = []
         for (let index = 0; index < resultSession.length; index++) {
-          counts[resultSession[index]] = counts[resultSession[index]] ? counts[resultSession[index]] + 1 : 1;
+          const element = resultSession[index];
+          numberArray[index] = element["USERID"]
         }
-        console.log(counts[0]);
-        var stringUser = "SELECT * FROM USER"
-        con.query(stringUser, function (err, resultUser) {
+        var map = numberArray.reduce(function(p, c) {
+          p[c] = (p[c] || 0) + 1;
+          return p;
+        }, {});
+
+        var newTypesArray = Object.keys(map).sort(function(a, b) {
+          return map[b] - map[a];
+        });
+        console.log(newTypesArray)
+        var getUser = "SELECT * FROM USER" 
+        con.query(getUser, function (err, resultUser) {
           if (err) console.log(err);
           if(resultUser !== []){
-            
+            var count = 0;
+            for (let index = 0; index < resultUser.length; index++) {
+              const user = resultUser[index];
+              newTypesArray.forEach(element => {
+                if(user["USERID"] == element){
+                  console.log(newTypesArray.indexOf(element) + 1)
+                  count++
+                }
+              });
+              
+            }
           }else{
             res.send(403)
           }
