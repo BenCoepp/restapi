@@ -275,24 +275,29 @@ const job = schedule.scheduleJob('10 * * * * *', function(){
         con.query(getUser, function (err, resultUser) {
           if (err) console.log(err);
           if(resultUser !== []){
-            // var count = 0;
-            // for (let index = 0; index < resultUser.length; index++) {
-            //   const user = resultUser[index];
-            //   newTypesArray.forEach(element => {
-            //     if(user["USERID"] == element){
-            //       console.log(newTypesArray.indexOf(element) + 1)
-            //       count++
-            //       var getUSERS = "UPDATE USER SET USERRANK = "+ count + " WHERE USERID = " + user["USERID"]
-            //       con.query(getUSERS, function (err, resultUSER) {
-            //         if (err) console.log(err);
-            //       });
-            //     }
-            //   });
-            //   var getUSERS = "UPDATE USER SET USERRANK = "+ count + " WHERE USERID = " + user["USERID"]
-            //       con.query(getUSERS, function (err, resultUSER) {
-            //         if (err) console.log(err);
-            //       });
-            // }
+            var count = 0;
+            for (let i = 0; i < newTypesArray.length; i++) {
+              const element = newTypesArray[i];
+              count++
+              var getUSERS = "UPDATE USER SET USERRANK = "+ count + " WHERE USERID = " + element
+              con.query(getUSERS, function (err, resultUSER) {
+                if (err) console.log(err);
+              });
+            }
+            for (let i = 0; i < newTypesArray.length; i++) {
+              for( var y = 0; y < resultUser.length; y++){ 
+                if ( resultUser[y]["USERID"] === Number(newTypesArray[i])) { 
+                  resultUser.splice(y, 1); 
+                }
+              }
+            }
+            resultUser.forEach(element => {
+              count++
+              var getUSERS = "UPDATE USER SET USERRANK = "+ count + " WHERE USERID = " + element["USERID"]
+                con.query(getUSERS, function (err, resultUSER) {
+                  if (err) console.log(err);
+                });
+            });
           }else{
             res.send(403)
           }
