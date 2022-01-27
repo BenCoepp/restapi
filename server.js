@@ -270,7 +270,6 @@ const job = schedule.scheduleJob('10 * * * * *', function(){
         var newTypesArray = Object.keys(map).sort(function(a, b) {
           return map[b] - map[a];
         });
-        console.log(newTypesArray)
         var getUser = "SELECT * FROM USER" 
         con.query(getUser, function (err, resultUser) {
           if (err) console.log(err);
