@@ -254,9 +254,16 @@ const job = schedule.scheduleJob('10 * * * * *', function(){
                 if(user["USERID"] == element){
                   console.log(newTypesArray.indexOf(element) + 1)
                   count++
+                  var getUSERS = "UPDATE USER SET USERRANK = "+ count + " WHERE USERID = " + user["USERID"]
+                  con.query(getUSERS, function (err, resultUSER) {
+                    if (err) console.log(err);
+                  });
                 }
               });
-              
+              var getUSERS = "UPDATE USER SET USERRANK = "+ count + " WHERE USERID = " + user["USERID"]
+                  con.query(getUSERS, function (err, resultUSER) {
+                    if (err) console.log(err);
+                  });
             }
           }else{
             res.send(403)
