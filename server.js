@@ -131,6 +131,7 @@ function createTables(){
   var sqlUSER = "CREATE TABLE USER (USERID INT NOT NULL AUTO_INCREMENT,USERRANK INT NOT NULL ,NAME VARCHAR(255),USERNAME VARCHAR(255),PASSWORD VARCHAR(255),CREATINDATE VARCHAR(255),LASTLOGIN VARCHAR(255),COUNTRY VARCHAR(255),AGE INT,PRIMARY KEY (USERID, USERRANK));"
   var sqlSESSION = "CREATE TABLE SESSION (SESSIONID INT AUTO_INCREMENT,USERID INT,CLICKS MEDIUMTEXT NOT NULL,STARTTIME VARCHAR(255),STOPTIME VARCHAR(255),PLATFORM VARCHAR(255),GOODCLICKS INT,BADCLICKS INT,PRIMARY KEY (SESSIONID, USERID));"
   var sqlTOKEN = "CREATE TABLE TOKEN (TOKENID INT NOT NULL AUTO_INCREMENT,USERID INT NOT NULL , TOKENSTRING VARCHAR(255),PRIMARY KEY (TOKENID, USERID));"
+  var sqlUPDATE = "CREATE TABLE APPUPDATES (UPDATEID INT AUTO_INCREMENT,UPDATETITEL VARCHAR(255),UPDATEDESC VARCHAR(255),DATE VARCHAR(255),PRIMARY KEY (UPDATEID));"
   con.query(sqlUSER, function (err, result) {
     if (err) console.log(err);
   });
@@ -138,6 +139,9 @@ function createTables(){
     if (err) console.log(err);
   });
   con.query(sqlTOKEN, function (err, result) {
+    if (err) console.log(err);
+  });
+  con.query(sqlUPDATE, function (err, result) {
     if (err) console.log(err);
   });
 }
@@ -159,6 +163,30 @@ app.get('/getleaderboard', (req, res) =>{
           if (err) console.log(err);
           if(resultUSER !== []){
             res.send(JSON.stringify(resultUSER))
+          }else{
+            res.send(404)
+          }
+        });
+      }else{
+        res.send(403)
+      }
+    });
+  }else{
+    res.send(403)
+  }
+})
+
+app.get('/getupdates', (req, res) =>{
+  if(apiKey == req.query.apiKey){
+    var getToken = "SELECT * FROM TOKEN WHERE TOKENSTRING ='" + req.query.token + "'"
+    con.query(getToken, function (err, resultToken) {
+      if (err) console.log(err);
+      if(resultToken !== []){
+        var getUPDATE = "SELECT * FROM APPUPDATES ORDER BY UPDATEID ASC"
+        con.query(getUPDATE, function (err, resultUPDATE) {
+          if (err) console.log(err);
+          if(resultUPDATE !== []){
+            res.send(JSON.stringify(resultUPDATE))
           }else{
             res.send(404)
           }
@@ -247,24 +275,24 @@ const job = schedule.scheduleJob('10 * * * * *', function(){
         con.query(getUser, function (err, resultUser) {
           if (err) console.log(err);
           if(resultUser !== []){
-            var count = 0;
-            for (let index = 0; index < resultUser.length; index++) {
-              const user = resultUser[index];
-              newTypesArray.forEach(element => {
-                if(user["USERID"] == element){
-                  console.log(newTypesArray.indexOf(element) + 1)
-                  count++
-                  var getUSERS = "UPDATE USER SET USERRANK = "+ count + " WHERE USERID = " + user["USERID"]
-                  con.query(getUSERS, function (err, resultUSER) {
-                    if (err) console.log(err);
-                  });
-                }
-              });
-              var getUSERS = "UPDATE USER SET USERRANK = "+ count + " WHERE USERID = " + user["USERID"]
-                  con.query(getUSERS, function (err, resultUSER) {
-                    if (err) console.log(err);
-                  });
-            }
+            // var count = 0;
+            // for (let index = 0; index < resultUser.length; index++) {
+            //   const user = resultUser[index];
+            //   newTypesArray.forEach(element => {
+            //     if(user["USERID"] == element){
+            //       console.log(newTypesArray.indexOf(element) + 1)
+            //       count++
+            //       var getUSERS = "UPDATE USER SET USERRANK = "+ count + " WHERE USERID = " + user["USERID"]
+            //       con.query(getUSERS, function (err, resultUSER) {
+            //         if (err) console.log(err);
+            //       });
+            //     }
+            //   });
+            //   var getUSERS = "UPDATE USER SET USERRANK = "+ count + " WHERE USERID = " + user["USERID"]
+            //       con.query(getUSERS, function (err, resultUSER) {
+            //         if (err) console.log(err);
+            //       });
+            // }
           }else{
             res.send(403)
           }
