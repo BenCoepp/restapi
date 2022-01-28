@@ -3,6 +3,7 @@ const app = express()
 const port = 3000
 var mysql = require('mysql');
 const schedule = require('node-schedule');
+const fs = require('fs')
 
 var con = mysql.createConnection({
   host: "localhost",
@@ -110,6 +111,20 @@ app.get('/getuser', (req, res) =>{
         res.send(403)
       }
     });
+  }else{
+    res.send(403)
+  }
+ })
+
+ app.get('/getcountries', (req, res) =>{
+  if(apiKey == req.query.apiKey){
+    fs.readFile('countrie_data.json', 'utf8' , (err, data) => {
+      if (err) {
+        console.error(err)
+        return
+      }
+      res.send(data)
+    })
   }else{
     res.send(403)
   }
