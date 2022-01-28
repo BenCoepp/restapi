@@ -70,7 +70,6 @@ app.get('/login', (req, res) => {
 app.post('/createuser', (req, res) =>{
  if(apiKey == req.query.apiKey){
   var createUser = "INSERT INTO USER (USERRANK,NAME,USERNAME,PASSWORD,CREATINDATE,LASTLOGIN,COUNTRY,AGE)VALUES (2 ,'" + req.query.name+"', '" + req.query.username+"', '" + req.query.password+"','" + req.query.creatindate + "','" + req.query.lastLogin +"','" + req.query.country+"'," +req.query.age + ");"
-  console.log(createUser)
   con.query(createUser, function (err, result) {
     if (err) console.log(err);
     if(result !== []){
